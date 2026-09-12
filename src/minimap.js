@@ -3,82 +3,102 @@
 export function creerMiniCarte(canvas, data, { surClic }) {
   const W = data.meta.world.w, H = data.meta.world.h;
   const dpr = Math.min(devicePixelRatio || 1, 2);
-  const L = canvas.clientWidth, Ht = canvas.clientHeight;
-  canvas.width = L * dpr;
-  canvas.height = Ht * dpr;
 
-  const ech = Math.min(L / W, Ht / H);
-  const ox = L / 2, oz = Ht / 2;
+  // Sous 720 px la mini-carte est masquée (voir style.css) : clientWidth vaut
+  // alors 0. Sans ce repli sur la taille déclarée, le canvas ferait 0×0 et
+  // drawImage lèverait une exception dès la première image — « The object is in
+  // an invalid state » sur Safari, et l'écran de chargement resterait bloqué.
+  const REPLI = { l: canvas.width || 200, h: canvas.height || 195 };
+
+  const ctx = canvas.getContext('2d');
+  const fond = document.createElement('canvas');
+
+  let L = 0, Ht = 0, ech = 1, ox = 0, oz = 0;
+  let reperes = [];
+  let survol = null;
+
   const px = (x) => ox + x * ech;
   const pz = (z) => oz + z * ech;
   const monde = (cx, cz) => [(cx - ox) / ech, (cz - oz) / ech];
 
   /* ---------------------------------------------------------- fond ---- */
-  const fond = document.createElement('canvas');
-  fond.width = canvas.width;
-  fond.height = canvas.height;
-  const f = fond.getContext('2d');
-  f.scale(dpr, dpr);
+  function dessinerFond() {
+    const f = fond.getContext('2d');
+    f.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  f.fillStyle = '#27291f';
-  f.fillRect(0, 0, L, Ht);
+    f.fillStyle = '#27291f';
+    f.fillRect(0, 0, L, Ht);
 
-  // bois et prairies
-  for (const zone of data.land) {
-    const vert = { forest: '#38492f', scrub: '#414d33', meadow: '#333e28', grass: '#333e28', vineyard: '#3d4429', orchard: '#39462c', farmland: '#3a3a29' }[zone.k];
-    if (!vert) continue;
-    f.fillStyle = vert;
+    // bois et prairies
+    for (const zone of data.land) {
+      const vert = { forest: '#38492f', scrub: '#414d33', meadow: '#333e28', grass: '#333e28', vineyard: '#3d4429', orchard: '#39462c', farmland: '#3a3a29' }[zone.k];
+      if (!vert) continue;
+      f.fillStyle = vert;
+      f.beginPath();
+      zone.r.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
+      f.closePath();
+      f.fill();
+    }
+
+    // bâti : la tache des bourgs
+    f.fillStyle = 'rgba(233, 220, 190, .78)';
+    for (const b of data.buildings) {
+      let x = 0, z = 0;
+      for (const p of b.r) { x += p[0]; z += p[1]; }
+      f.fillRect(px(x / b.r.length) - 0.7, pz(z / b.r.length) - 0.7, 1.5, 1.5);
+    }
+
+    // routes principales
+    f.strokeStyle = 'rgba(208, 190, 152, .62)';
+    f.lineWidth = 0.8;
     f.beginPath();
-    zone.r.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
-    f.closePath();
-    f.fill();
-  }
+    for (const r of data.roads) {
+      if (!['secondary', 'tertiary', 'primary', 'unclassified'].includes(r.k)) continue;
+      r.p.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
+    }
+    f.stroke();
 
-  // bâti : la tache des bourgs
-  f.fillStyle = 'rgba(233, 220, 190, .78)';
-  for (const b of data.buildings) {
-    let x = 0, z = 0;
-    for (const p of b.r) { x += p[0]; z += p[1]; }
-    f.fillRect(px(x / b.r.length) - 0.7, pz(z / b.r.length) - 0.7, 1.5, 1.5);
-  }
-
-  // routes principales
-  f.strokeStyle = 'rgba(208, 190, 152, .62)';
-  f.lineWidth = 0.8;
-  f.beginPath();
-  for (const r of data.roads) {
-    if (!['secondary', 'tertiary', 'primary', 'unclassified'].includes(r.k)) continue;
-    r.p.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
-  }
-  f.stroke();
-
-  // la Moine
-  f.fillStyle = '#4a86a0';
-  for (const p of data.water) {
+    // la Moine
+    f.fillStyle = '#4a86a0';
+    for (const p of data.water) {
+      f.beginPath();
+      p.r.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
+      f.closePath();
+      f.fill();
+    }
+    f.strokeStyle = '#5b9ab6';
+    f.lineWidth = 1.6;
     f.beginPath();
-    p.r.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
-    f.closePath();
-    f.fill();
+    data.river.pts.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
+    f.stroke();
+
+    // cadre
+    f.strokeStyle = 'rgba(240, 228, 202, .22)';
+    f.lineWidth = 1;
+    f.strokeRect(0.5, 0.5, L - 1, Ht - 1);
   }
-  f.strokeStyle = '#5b9ab6';
-  f.lineWidth = 1.6;
-  f.beginPath();
-  data.river.pts.forEach(([x, z], i) => (i ? f.lineTo(px(x), pz(z)) : f.moveTo(px(x), pz(z))));
-  f.stroke();
 
-  // cadre
-  f.strokeStyle = 'rgba(240, 228, 202, .22)';
-  f.lineWidth = 1;
-  f.strokeRect(0.5, 0.5, L - 1, Ht - 1);
-
-  /* --------------------------------------------------------- repères ---- */
-  const reperes = data.landmarks.map((l) => ({ ...l, cx: px(l.x), cz: pz(l.z) }));
+  /* ------------------------------------------------------- dimensions ---- */
+  // Recalculé à la demande : la mini-carte change de taille à 1180 px et
+  // réapparaît quand le téléphone passe en paysage.
+  function mesurer() {
+    const l = Math.round(canvas.clientWidth) || REPLI.l;
+    const h = Math.round(canvas.clientHeight) || REPLI.h;
+    if (l === L && h === Ht) return;
+    L = l; Ht = h;
+    ech = Math.min(L / W, Ht / H);
+    ox = L / 2; oz = Ht / 2;
+    canvas.width = Math.max(1, Math.round(L * dpr));
+    canvas.height = Math.max(1, Math.round(Ht * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fond.width = canvas.width;
+    fond.height = canvas.height;
+    dessinerFond();
+    reperes = data.landmarks.map((l2) => ({ ...l2, cx: px(l2.x), cz: pz(l2.z) }));
+  }
+  mesurer();
 
   /* ------------------------------------------------------- interaction ---- */
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  let survol = null;
-
   const local = (ev) => {
     const r = canvas.getBoundingClientRect();
     return [ev.clientX - r.left, ev.clientY - r.top];
@@ -102,6 +122,10 @@ export function creerMiniCarte(canvas, data, { surClic }) {
   return {
     /** @param {{x:number,z:number}} cam @param {{x:number,z:number}} cible @param {number} fov */
     dessiner(cam, cible, capMonde, ouverture) {
+      // masquée : rien à peindre, et autant économiser le dessin à chaque image
+      if (canvas.clientWidth === 0 || canvas.clientHeight === 0) return;
+      mesurer();
+
       ctx.clearRect(0, 0, L, Ht);
       ctx.drawImage(fond, 0, 0, L, Ht);
 
