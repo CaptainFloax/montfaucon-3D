@@ -7,6 +7,7 @@ export function creerInterface({ landmarks, surRepere, surHeure, surPluie, surEt
   const jouer = $('#jouer');
   const fiche = $('#fiche');
   const barre = $('.reperes');
+  const replier = $('#replier');
 
   const format = (min) => `${String(Math.floor(min / 60) % 24).padStart(2, '0')}:${String(Math.floor(min) % 60).padStart(2, '0')}`;
   const nommer = (min) => {
@@ -37,10 +38,28 @@ export function creerInterface({ landmarks, surRepere, surHeure, surPluie, surEt
     jouer.textContent = defilement ? '❚❚' : '▶';
   });
 
+  /* --- repli du panneau : sur téléphone il occupe la moitié de l'écran --- */
+  const majPoignee = () => {
+    const replie = document.body.classList.contains('replie');
+    replier.textContent = replie ? '▴' : '▾';
+    replier.title = replie ? 'Afficher le panneau (h)' : 'Réduire le panneau (h)';
+    replier.setAttribute('aria-label', replier.title);
+    replier.setAttribute('aria-expanded', String(!replie));
+  };
+  const basculerPanneau = () => {
+    document.body.classList.toggle('replie');
+    majPoignee();
+  };
+  replier.addEventListener('click', basculerPanneau);
+  majPoignee();
+
   addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !/input|button|select/i.test(e.target.tagName)) {
+    if (/input|textarea|button|select/i.test(e.target.tagName)) return;
+    if (e.code === 'Space') {
       e.preventDefault();
       jouer.click();
+    } else if (e.key === 'h' || e.key === 'H') {
+      basculerPanneau();
     }
   });
 

@@ -47,6 +47,16 @@ canvas#vue { position: fixed; inset: 0; width: 100%; height: 100%; display: bloc
   -webkit-backdrop-filter: blur(16px) saturate(1.25);
   border: 1px solid rgba(233, 221, 197, .16); border-radius: 15px; box-shadow: var(--ombre);
 }
+#hudCorps { display: grid; gap: .55rem; }
+/* La poignée reste dans le flux de la ligne d'heure : en position absolue elle
+   aurait fallu lui réserver une marge, et le panneau ouvert s'enroulait sur une
+   ligne de plus sur téléphone. */
+#replier { margin-left: auto; font-size: .68rem; }
+
+/* Replié, il ne reste que l'heure : sur téléphone les repères et les réglages
+   occupent à eux seuls les trois quarts du panneau. */
+body.replie #hudCorps { display: none; }
+
 .ligne { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
 
 .ligne.heure { gap: .7rem; }
@@ -158,6 +168,7 @@ button.plat {
 @media (max-width: 720px) {
   #aide, #boussole { display: none; }
   #fiche { top: auto; bottom: 12.6rem; right: .8rem; transform: none; }
+  body.replie #fiche { bottom: 5.2rem; }
   .credit { display: none; }
   .reperes { max-height: 3.4rem; overflow-x: auto; flex-wrap: nowrap; }
 }
