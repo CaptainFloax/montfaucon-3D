@@ -36,17 +36,20 @@
     <input id="heure" type="range" min="0" max="1439" step="1" value="618" aria-label="Heure de la journée" />
     <output id="pendule">10:18</output>
     <span id="moment">matin</span>
+    <button id="replier" type="button" class="ico" aria-controls="hudCorps" aria-expanded="true">▾</button>
   </div>
 
-  <div class="ligne reperes" role="group" aria-label="Points de repère"></div>
+  <div id="hudCorps">
+    <div class="ligne reperes" role="group" aria-label="Points de repère"></div>
 
-  <div class="ligne reglages">
-    <label class="bascule"><input type="checkbox" id="pluie" /><span>Pluie fine</span></label>
-    <label class="bascule"><input type="checkbox" id="etiquettes" checked /><span>Étiquettes</span></label>
-    <label class="bascule"><input type="checkbox" id="courbes" /><span>Courbes de niveau</span></label>
-    <label class="bascule"><input type="checkbox" id="ronde" /><span>Ronde</span></label>
-    <button id="vueLarge" type="button" class="plat">Vue d'ensemble</button>
-    <span class="credit">données&nbsp;© <b>OpenStreetMap</b> · relief EU-DEM</span>
+    <div class="ligne reglages">
+      <label class="bascule"><input type="checkbox" id="pluie" /><span>Pluie fine</span></label>
+      <label class="bascule"><input type="checkbox" id="etiquettes" checked /><span>Étiquettes</span></label>
+      <label class="bascule"><input type="checkbox" id="courbes" /><span>Courbes de niveau</span></label>
+      <label class="bascule"><input type="checkbox" id="ronde" /><span>Ronde</span></label>
+      <button id="vueLarge" type="button" class="plat">Vue d'ensemble</button>
+      <span class="credit">données&nbsp;© <b>OpenStreetMap</b> · relief EU-DEM</span>
+    </div>
   </div>
 </div>
 
@@ -57,7 +60,7 @@
 
 <div id="aide">
   <b>glisser</b> tourner · <b>molette</b> zoomer vers le curseur · <b>double-clic</b> aller sur place<br>
-  <b>clic droit</b> ou <b>flèches</b> déplacer · <b>espace</b> défilement de l'heure
+  <b>clic droit</b> ou <b>flèches</b> déplacer · <b>espace</b> défilement de l'heure · <b>h</b> replier le panneau
 </div>
 
 <script type="module" src="src/main.js"></script>
