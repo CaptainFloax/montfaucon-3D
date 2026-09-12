@@ -1,0 +1,37 @@
+# Déploiement Dokploy.
+#
+# Dokploy clone le dépôt et lance ce fichier. Pour exposer un domaine :
+# onglet « Domains » de l'application Compose → service `montfaucon-3d`,
+# port conteneur `80`. Dokploy ajoute lui-même les labels Traefik.
+#
+# Le réseau `dokploy-network` est celui de l'hôte Dokploy ; il doit être
+# déclaré `external` pour que Traefik atteigne le conteneur.
+#
+# Pour essayer en local, utilise plutôt docker-compose.local.yml.
+
+services:
+  montfaucon-3d:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: montfaucon-3d:latest
+    restart: unless-stopped
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true

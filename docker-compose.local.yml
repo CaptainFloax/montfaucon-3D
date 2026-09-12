@@ -1,0 +1,11 @@
+# Essai local : docker compose -f docker-compose.local.yml up --build
+# puis http://localhost:3002
+services:
+  montfaucon-3d:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: montfaucon-3d:latest
+    restart: unless-stopped
+    ports:
+      - "3002:80"

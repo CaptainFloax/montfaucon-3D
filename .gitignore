@@ -1,0 +1,7 @@
+# caches intermédiaires des lots Overpass (le fichier fusionné suffit)
+data/raw/
+# scène dérivée : reconstruite par run.sh et par le Dockerfile
+data/scene.json
+
+node_modules/
+.DS_Store

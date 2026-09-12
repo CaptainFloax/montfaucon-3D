@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Montfaucon-Montigné en 3D — 49230</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🏰</text></svg>" />
+<link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+<canvas id="vue"></canvas>
+
+<div id="labels" aria-hidden="true"></div>
+
+<div id="chargement">
+  <div class="marque">Montfaucon-Montigné</div>
+  <div class="sous">49230 · Maine-et-Loire · vallée de la Moine</div>
+  <div class="barre"><i></i></div>
+  <div class="etape">préparation…</div>
+</div>
+
+<header id="titre">
+  <h1>Montfaucon-Montigné</h1>
+  <p>49230 — la Moine, le bourg et ses moulins, en volumes</p>
+</header>
+
+<aside id="fiche" hidden>
+  <button class="fermer" type="button" aria-label="Fermer">×</button>
+  <h2></h2>
+  <p></p>
+</aside>
+
+<div id="hud">
+  <div class="ligne heure">
+    <button id="jouer" type="button" class="ico" title="Faire défiler l'heure (barre espace)">▶</button>
+    <input id="heure" type="range" min="0" max="1439" step="1" value="618" aria-label="Heure de la journée" />
+    <output id="pendule">10:18</output>
+    <span id="moment">matin</span>
+  </div>
+
+  <div class="ligne reperes" role="group" aria-label="Points de repère"></div>
+
+  <div class="ligne reglages">
+    <label class="bascule"><input type="checkbox" id="pluie" /><span>Pluie fine</span></label>
+    <label class="bascule"><input type="checkbox" id="etiquettes" checked /><span>Étiquettes</span></label>
+    <label class="bascule"><input type="checkbox" id="courbes" /><span>Courbes de niveau</span></label>
+    <label class="bascule"><input type="checkbox" id="ronde" /><span>Ronde</span></label>
+    <button id="vueLarge" type="button" class="plat">Vue d'ensemble</button>
+    <span class="credit">données&nbsp;© <b>OpenStreetMap</b> · relief EU-DEM</span>
+  </div>
+</div>
+
+<aside id="boussole">
+  <canvas id="carte" width="200" height="195" aria-label="Mini-carte de Montfaucon-Montigné"></canvas>
+  <p><b id="altitude">—</b> · clic sur la carte pour s'y rendre</p>
+</aside>
+
+<div id="aide">
+  <b>glisser</b> tourner · <b>molette</b> zoomer vers le curseur · <b>double-clic</b> aller sur place<br>
+  <b>clic droit</b> ou <b>flèches</b> déplacer · <b>espace</b> défilement de l'heure
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

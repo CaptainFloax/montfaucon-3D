@@ -1,0 +1,9 @@
+.git
+.gitignore
+data/raw
+data/scene.json
+node_modules
+*.md
+.DS_Store
+docker-compose*.yml
+run.sh
